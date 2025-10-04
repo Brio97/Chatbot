@@ -1,0 +1,15 @@
+# Ignore generated files and directories
+chroma/
+uploads/
+
+# Ignore common operating system files
+.DS_Store
+
+# Ignore common temporary files and logs
+*.log
+*.tmp
+
+# Python-specific ignores (assuming Python or similar language)
+__pycache__/
+*.pyc
+.env
