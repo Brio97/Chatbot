@@ -5,20 +5,26 @@ sem ChatType = """ChatType enum defines the types of chat interactions. ChatType
 - VIDEO: For interactions involving video analysis or video-related questions.
 """;
 
-sem Router.classify = "Classify the message based on the user's query and whether a file is attached. If a file_path is provided and ends with image extensions (.jpg, .jpeg, .png, .webp), classify as IMAGE. If it ends with video extensions (.mp4, .avi, .mov), classify as VIDEO. If it ends with .pdf or .txt, classify as RAG. Otherwise, classify as QA. Image-related questions should be classified as IMAGE, and video-related questions as VIDEO.";
+sem Router.classify = """Classify the user's message and file_path into exactly ONE integer:
+1 = RAG (document questions or if file_path ends with .pdf or .txt)
+2 = QA (general questions, default choice)
+3 = IMAGE (image questions or if file_path ends with .jpg, .jpeg, .png, .webp)
+4 = VIDEO (video questions or if file_path ends with .mp4, .avi, .mov)
+
+Check the file_path extension first. If file_path is empty, classify based on the message content.
+Return ONLY the integer (1, 2, 3, or 4). No other text.""";
 
 sem ImageChat.respond_with_image = """Answer the user's message(text) by referring to the provided image. Always refer to the given image, answer relevant to the given image.""";
 
 sem VideoChat.respond_with_video = """Answer the user's message using the provided video and text. Always refer to the given video, answer relevant to the given video.""";
 
-sem RagChat.respond = """Generate a helpful response to the user's message. Use available mcp tool when needed. Use list_mcp_tools to find out what are the available tools. Always pass arguments as a flat dictionary (e.g., {\"query\": \"Your search query\"}), never as a list or schema_dict_wrapper. """;
+sem RagChat.respond = """Generate a helpful response to the user's message. Use available mcp tool when needed.Use list_mcp_tools to find out what are the available tools. Always pass arguments as a flat dictionary (e.g., {\"query\": \"Your search query\"}), never as a list or schema_dict_wrapper. """;
 
 sem QAChat.respond = """Generate a helpful response to the user's message.""";
 
 
 impl ImageChat.chat {
     img_path = visitor.file_path;
-    
     response = self.respond_with_image(
         img=Image(img_path),
         text=Text(text=visitor.message),
@@ -33,7 +39,6 @@ impl ImageChat.chat {
 
 impl VideoChat.chat {
     video_path = visitor.file_path;
-    
     response = self.respond_with_video(
         video=Video(video_path),
         text=Text(text=visitor.message),
@@ -48,14 +53,10 @@ impl VideoChat.chat {
 
 
 impl RagChat.chat {
-    # The key fix: RagChat uses MCP tools to search documents
-    # The LLM will automatically call search_docs tool when needed
-    # because it's specified in the tools parameter
     response = self.respond(
         message=visitor.message,
         chat_history=visitor.chat_history,
     );
-    
     visitor.chat_history.append({"role": "assistant", "content": response});
     self.chat_history = visitor.chat_history;
     visitor.response = response;
@@ -67,7 +68,6 @@ impl QAChat.chat {
         message=visitor.message,
         chat_history=visitor.chat_history,
     );
-    
     visitor.chat_history.append({"role": "assistant", "content": response});
     self.chat_history = visitor.chat_history;
     visitor.response = response;
@@ -92,7 +92,7 @@ impl upload_file.save_doc {
     if lower_name.endswith(".pdf") or lower_name.endswith(".txt") {
         print(f"Adding {file_path} to RAG engine...");
         rag_engine.add_file(file_path);
-        print(f"Successfully added to RAG engine");
+        print("Successfully added to RAG engine");
     }
 
     report {

@@ -22,7 +22,7 @@ enum ChatType {
 }
 
 node Router {
-    def classify(message: str, file_path: str) -> ChatType by llm(method="Reason", temperature=0.8);
+    def classify(message: str, file_path: str) -> ChatType by llm(method="Reason", temperature=0.0);
 }
 
 node Chat {
