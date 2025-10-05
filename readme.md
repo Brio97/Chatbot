@@ -47,13 +47,14 @@ This project implements a chatbot using Jaclang, leveraging various AI and NLP c
 
 6.  **Run the Streamlit Frontend**:
     ```bash
-    streamlit run client.jac
+    streamlit run streamlit_app.py
     ```
 
 ## Project Structure
 
 -   `server.jac`: Main Jaclang server logic, including chat routing and interaction.
--   `client.jac`: Streamlit frontend for user interaction.
+-   `client.jac`: Jaclang code for the Streamlit frontend logic.
+-   `streamlit_app.py`: Python script to run the Streamlit frontend.
 -   `mcp_client.jac`: Jaclang client for interacting with the MCP server.
 -   `mcp_server.jac`: Jaclang MCP server providing `search_docs` and `search_web` tools.
 -   `tools.jac`: Contains `RagEngine` for document processing and `WebSearch` for web queries.
