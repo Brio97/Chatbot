@@ -22,7 +22,7 @@ enum ChatType {
 }
 
 node Router {
-    def classify(message: str, file_path: str) -> ChatType by llm(method="Reason", temperature=0.0);
+    def classify(message: str, file_path: str) -> ChatType by llm(method="Reason", temperature=0.1);
 }
 
 node Chat {
@@ -77,11 +77,14 @@ node RagChat(Chat) {
 
 node QAChat(Chat) {
     has chat_type: ChatType = ChatType.QA;
+
     def respond(message:str, chat_history:list[dict]) -> str
         by llm(
+            tools=([list_mcp_tools, use_mcp_tool]),
             messages=chat_history,
             max_react_iterations=6
         );
+
     can chat with infer entry;
 }
 

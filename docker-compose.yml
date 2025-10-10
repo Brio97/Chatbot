@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+      - "8899:8899"
+    environment:
+      # These should be set in your deployment environment or a .env file
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SERPER_API_KEY: ${SERPER_API_KEY}
+      MCP_SERVER_URL: http://backend:8899/mcp # Internal Docker network communication
+    command: sh -c "jac run mcp_server.jac & jac run server.jac"
+    volumes:
+      - ./chroma:/app/chroma
+      - ./uploads:/app/uploads
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    environment:
+      JAC_INSTANCE_URL: http://backend:8000 # Internal Docker network communication
+      JAC_TEST_USER_EMAIL: test@mail.com
+      JAC_TEST_USER_PASSWORD: password
+    depends_on:
+      - backend

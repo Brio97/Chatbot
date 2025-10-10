@@ -20,7 +20,12 @@ sem VideoChat.respond_with_video = """Answer the user's message using the provid
 
 sem RagChat.respond = """Generate a helpful response to the user's message. Use available mcp tool when needed.Use list_mcp_tools to find out what are the available tools. Always pass arguments as a flat dictionary (e.g., {\"query\": \"Your search query\"}), never as a list or schema_dict_wrapper. """;
 
-sem QAChat.respond = """Generate a helpful response to the user's message.""";
+import json;
+
+sem QAChat.respond = """Generate a helpful response to the user's message. 
+If the user asks about current events, news, websites, or information that requires real-time data, 
+use the available MCP tools. Use list_mcp_tools to see available tools including web search and fetch webpage.
+Always pass arguments as a flat dictionary (e.g., {"query": "Your search query"}).""";
 
 
 impl ImageChat.chat {
@@ -64,6 +69,10 @@ impl RagChat.chat {
 }
 
 impl QAChat.chat {
+    # Debug: Check available tools
+    available_tools = list_mcp_tools();
+    print(f"Available MCP tools: {available_tools}");
+    
     response = self.respond(
         message=visitor.message,
         chat_history=visitor.chat_history,
@@ -111,8 +120,9 @@ def list_mcp_tools() -> list[str] {
 name must be one of available tools from list_mcp_tools(), do not make up any tool names.
 
 Example input for `use_mcp_tool`:
-{"name": "tool_name", "arguments": {"query": "your query"}}
+{"name": "tool_name", "arguments": '{"query": "your query"}'}
 """
-def use_mcp_tool(name: str, arguments: dict[str, str]) -> str {
-    return mcp_client.call_mcp_tool(name=name, arguments=arguments);
+def use_mcp_tool(name: str, arguments: str) -> str {
+    parsed_arguments = json.loads(arguments);
+    return mcp_client.call_mcp_tool(name=name, arguments=parsed_arguments);
 }

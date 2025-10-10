@@ -1,0 +1,24 @@
+# Use an official Python runtime as a parent image
+FROM python:3.12-slim-bookworm
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Upgrade pip and install Jaclang
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir jaclang
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose the port the Jaclang server runs on
+EXPOSE 8000
+EXPOSE 8899
+
+# Command to run the Jaclang server (you'll run mcp_server.jac and server.jac separately or via a script)
+# For simplicity, we'll just keep the container alive.
+# You'll typically run these with docker-compose or a custom entrypoint script.
+CMD ["tail", "-f", "/dev/null"]

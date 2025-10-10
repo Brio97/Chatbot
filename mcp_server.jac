@@ -1,11 +1,12 @@
 import os;
-import from tools {RagEngine, WebSearch}
+import from tools {RagEngine, WebSearch, WebFetcher}
 import from mcp.server.fastmcp.tools {Tool}
 import from mcp.server.fastmcp {FastMCP}
 import typing;
 
 glob rag_engine: RagEngine = RagEngine();
 glob web_search: WebSearch = WebSearch();
+glob web_fetcher: WebFetcher = WebFetcher();
 
 
 with entry {
@@ -31,6 +32,12 @@ async def tool_search_web(query: str) -> str{
         return "Mention No results found for the web search";
     }
     return web_search_results;
+}
+
+@mcp.tool(name="fetch_webpage")
+@resolve_hints
+async def tool_fetch_webpage(url: str) -> str {
+    return web_fetcher.fetch_url(url);
 }
 
 
